@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "The Shawshank Redemption",
+    "coordinates": {
+      "x": 45,
+      "y": 30.5
+    },
+    "creationDate": "2024-05-22T15:22:57.09073Z",
+    "oscarsCount": 7,
+    "genre": "DRAMA",
+    "mpaaRating": "R",
+    "screenwriter": {
+      "name": "Frank Darabont",
+      "passportID": "A12345678",
+      "eyeColor": "GREEN",
+      "hairColor": "BLACK",
+      "nationality": "USA",
+      "location": {
+        "x": 100.0,
+        "y": 200,
+        "z": 300.0,
+        "name": "Los Angeles"
+      }
+    }
+  },
+  {
+    "id": 2,
+    "name": "The Godfather",
+    "coordinates": {
+      "x": 50,
+      "y": 40.5
+    },
+    "creationDate": "2024-05-22T15:22:57.09077Z",
+    "oscarsCount": 3,
+    "genre": "DRAMA",
+    "mpaaRating": "R",
+    "screenwriter": {
+      "name": "Mario Puzo",
+      "passportID": "B12345678",
+      "eyeColor": "BROWN",
+      "hairColor": "BLACK",
+      "nationality": "USA",
+      "location": {
+        "x": 200.0,
+        "y": 300,
+        "z": 400.0,
+        "name": "New York"
+      }
+    }
+  }
+]
