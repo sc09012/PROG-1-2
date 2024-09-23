@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import com.project.enums.MovieGenre;
 import com.project.enums.MpaaRating;
+import com.project.util.ZonedDateTimeAdapter;
 
 public class Movie implements Comparable<Movie> {
     private static int idCounter = 1;
@@ -39,7 +40,9 @@ public class Movie implements Comparable<Movie> {
     }
 
     public static Movie fromJson(String json) {
-        Gson gson = new Gson();
+       Gson gson = new GsonBuilder()
+        .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
+        .create();
         return gson.fromJson(json, Movie.class);
     }
 
@@ -50,8 +53,8 @@ public class Movie implements Comparable<Movie> {
 
     @Override
     public int compareTo(Movie other) {
-        return this.id.compareTo(other.id);
-    }
+     return Integer.compare(this.id, other.id);
+}
 
     @Override
     public boolean equals(Object o) {
