@@ -11,10 +11,14 @@ import java.util.TreeSet;
 public class CollectionManager {
     private TreeSet<Movie> movies;
     private File jsonCollection;
+    private Gson gson;
 
     public CollectionManager(String collectionPath) throws IOException {
         this.jsonCollection = new File(collectionPath);
         this.movies = new TreeSet<>();
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
+                .create();
         load();
     }
 
@@ -45,8 +49,19 @@ public class CollectionManager {
                 add(parts[1]);
                 break;
             case "update":
-                update(Integer.parseInt(parts[1]), parts[2]);
+                if (parts.length < 2) {
+                System.out.println("Usage: update <id> <movieJson>");
                 break;
+            }
+            String[] updateParts = parts[1].split(" ", 2);
+            if (updateParts.length < 2) {
+                System.out.println("Usage: update <id> <movieJson>");
+                break;
+            }
+            int updateId = Integer.parseInt(updateParts[0]); // Convierte el primer elemento a ID
+            String movieJson = updateParts[1]; // Obtiene el JSON
+            update(updateId, movieJson);
+            break;
             case "remove_by_id":
                 removeById(Integer.parseInt(parts[1]));
                 break;
@@ -100,19 +115,30 @@ public class CollectionManager {
     }
 
     private void add(String movieJson) {
-        Movie movie = Movie.fromJson(movieJson);
+        Movie movie = gson.fromJson(movieJson, Movie.class); // Usar la instancia de Gson
         movies.add(movie);
         System.out.println("Movie added.");
         save();
     }
 
-    private void update(int id, String movieJson) {
-        Movie newMovie = Movie.fromJson(movieJson);
-        movies.removeIf(movie -> movie.getId().equals(id));
-        movies.add(newMovie);
+  private void update(int id, String movieJson) {
+    Movie newMovie = Movie.fromJson(movieJson);
+    
+    // Verifica si la película existe
+    Movie existingMovie = movies.stream()
+                                 .filter(movie -> movie.getId().equals(id))
+                                 .findFirst()
+                                 .orElse(null);
+    
+    if (existingMovie != null) {
+        movies.remove(existingMovie); // Elimina la película existente
+        movies.add(newMovie); // Agrega la nueva película
         System.out.println("Movie updated.");
         save();
+    } else {
+        System.out.println("Movie not found for the given ID.");
     }
+}
 
     private void removeById(int id) {
         movies.removeIf(movie -> movie.getId().equals(id));
@@ -126,34 +152,48 @@ public class CollectionManager {
         save();
     }
 
-    private void executeScript(String fileName) {
-        // Implement script execution logic here
-    }
-
-    private void addIfMin(String movieJson) {
-        Movie movie = Movie.fromJson(movieJson);
-        if (movies.stream().allMatch(m -> m.compareTo(movie) > 0)) {
-            movies.add(movie);
-            System.out.println("Movie added.");
-            save();
-        } else {
-            System.out.println("Movie not added. It is not the minimum.");
+  private void executeScript(String fileName) {
+    try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+        String command;
+        while ((command = reader.readLine()) != null) {
+            System.out.println("Executing: " + command);
+            handleCommand(command);
         }
+    } catch (IOException e) {
+        System.out.println("Error reading the script file: " + e.getMessage());
+    } catch (Exception e) {
+        System.out.println("An error occurred while executing the command: " + e.getMessage());
     }
+}
 
-    private void removeGreater(String movieJson) {
-        Movie movie = Movie.fromJson(movieJson);
-        movies.removeIf(m -> m.compareTo(movie) > 0);
-        System.out.println("Movies greater than the given movie removed.");
+  private void addIfMin(String movieJson) {
+    Movie movie = Movie.fromJson(movieJson);
+    // Comparar usando el conteo de Oscars
+    boolean isMin = movies.stream().allMatch(m -> m.getOscarsCount() > movie.getOscarsCount());
+    
+    if (isMin) {
+        movies.add(movie);
+        System.out.println("Movie added.");
         save();
+    } else {
+        System.out.println("Movie not added. It is not the minimum.");
     }
+}
 
-    private void removeLower(String movieJson) {
-        Movie movie = Movie.fromJson(movieJson);
-        movies.removeIf(m -> m.compareTo(movie) < 0);
-        System.out.println("Movies lower than the given movie removed.");
-        save();
-    }
+  private void removeGreater(String movieJson) {
+    Movie movie = Movie.fromJson(movieJson);
+    movies.removeIf(m -> m.getOscarsCount() > movie.getOscarsCount());
+    System.out.println("Movies greater than the given movie removed.");
+    save();
+}
+
+
+   private void removeLower(String movieJson) {
+    Movie movie = Movie.fromJson(movieJson);
+    movies.removeIf(m -> m.getOscarsCount() < movie.getOscarsCount());
+    System.out.println("Movies lower than the given movie removed.");
+    save();
+}
 
     private void minByOscarsCount() {
         movies.stream().min((m1, m2) -> Integer.compare(m1.getOscarsCount(), m2.getOscarsCount()))
@@ -189,14 +229,11 @@ public class CollectionManager {
 
     private void save() {
         try (Writer writer = new BufferedWriter(new FileWriter(jsonCollection))) {
-            Gson gson = new GsonBuilder()
-                    .setPrettyPrinting()
-                    .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
-                    .create();
-            writer.write(gson.toJson(movies.toArray()));
-            System.out.println("connection terminated.");
+            writer.write(gson.toJson(movies.toArray())); // Usar la instancia de Gson
+            System.out.println("Collection saved.");
         } catch (IOException e) {
             System.err.println("Error saving collection: " + e.getMessage());
         }
     }
+
 }
