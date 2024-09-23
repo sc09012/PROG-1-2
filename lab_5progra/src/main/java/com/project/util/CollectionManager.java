@@ -75,7 +75,6 @@ public class CollectionManager {
                 executeScript(parts[1]);
                 break;
             case "exit":
-                save();
                 System.exit(0);
                 break;
             case "add_if_min":
@@ -118,7 +117,6 @@ public class CollectionManager {
         Movie movie = gson.fromJson(movieJson, Movie.class); // Usar la instancia de Gson
         movies.add(movie);
         System.out.println("Movie added.");
-        save();
     }
 
   private void update(int id, String movieJson) {
@@ -134,7 +132,6 @@ public class CollectionManager {
         movies.remove(existingMovie); // Elimina la película existente
         movies.add(newMovie); // Agrega la nueva película
         System.out.println("Movie updated.");
-        save();
     } else {
         System.out.println("Movie not found for the given ID.");
     }
@@ -143,13 +140,11 @@ public class CollectionManager {
     private void removeById(int id) {
         movies.removeIf(movie -> movie.getId().equals(id));
         System.out.println("Movie removed.");
-        save();
     }
 
     private void clear() {
         movies.clear();
         System.out.println("Collection cleared.");
-        save();
     }
 
   private void executeScript(String fileName) {
@@ -184,7 +179,6 @@ public class CollectionManager {
     Movie movie = Movie.fromJson(movieJson);
     movies.removeIf(m -> m.getOscarsCount() > movie.getOscarsCount());
     System.out.println("Movies greater than the given movie removed.");
-    save();
 }
 
 
@@ -192,7 +186,6 @@ public class CollectionManager {
     Movie movie = Movie.fromJson(movieJson);
     movies.removeIf(m -> m.getOscarsCount() < movie.getOscarsCount());
     System.out.println("Movies lower than the given movie removed.");
-    save();
 }
 
     private void minByOscarsCount() {
