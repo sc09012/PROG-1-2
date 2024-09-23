@@ -1,0 +1,7 @@
+show
+help
+info
+min_by_oscars_count
+print_ascending
+print_field_ascending_oscars_count
+exit
